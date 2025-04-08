@@ -7,8 +7,12 @@ use num_integer::{sqrt, Integer};
 use num_traits::{FromPrimitive, One, Pow, Signed, Zero};
 use rand_core::CryptoRngCore;
 use zeroize::{Zeroize, Zeroizing};
+use bytemuck::cast_ref;
 #[cfg(all(target_os = "zkvm"))]
 use zkm_lib::io::hint_slice;
+
+use crypto_bigint::{Integer as CryptoInteger, NonZero, Encoding, U2048, U256, U4096};
+use core::convert::TryInto;
 
 use crate::errors::{Error, Result};
 use crate::traits::{PrivateKeyParts, PublicKeyParts};
