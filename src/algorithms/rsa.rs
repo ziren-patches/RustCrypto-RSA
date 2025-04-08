@@ -8,7 +8,7 @@ use num_traits::{FromPrimitive, One, Pow, Signed, Zero};
 use rand_core::CryptoRngCore;
 use zeroize::{Zeroize, Zeroizing};
 #[cfg(all(target_os = "zkvm"))]
-use zkm2_lib::io::hint_slice;
+use zkm_lib::io::hint_slice;
 
 use crate::errors::{Error, Result};
 use crate::traits::{PrivateKeyParts, PublicKeyParts};
@@ -66,7 +66,7 @@ cfg_if::cfg_if! {
         /// It calculates the quotient and remainder in unconstrained.
         fn mul_mod_u2048(a: &U2048, b: &U2048, modulus: &U2048) -> U2048 {
             let prod = mul_u2048(*a, *b);
-            zkm2_lib::unconstrained! {
+            zkm_lib::unconstrained! {
                 let modulus_u4096 = U4096::from(modulus);
                 let modulus_u4096_nonzero = NonZero::new(modulus_u4096).unwrap(); // Convert modulus to NonZero
                 let (quotient, result) = prod.div_rem(&modulus_u4096_nonzero);
@@ -77,8 +77,8 @@ cfg_if::cfg_if! {
                 hint_slice(&quotient_bytes[..256]);
             }
 
-            let result_bytes: [u8; 256] = zkm2_lib::io::read_vec().try_into().unwrap();
-            let quotient_bytes: [u8; 256] = zkm2_lib::io::read_vec().try_into().unwrap();
+            let result_bytes: [u8; 256] = zkm_lib::io::read_vec().try_into().unwrap();
+            let quotient_bytes: [u8; 256] = zkm_lib::io::read_vec().try_into().unwrap();
 
             let q_array = U2048::from_le_slice(&quotient_bytes);
             let result = U2048::from_le_slice(&result_bytes);
@@ -114,7 +114,7 @@ cfg_if::cfg_if! {
             let mut result_words = [0u32; 128];
             let result_ptr = result_words.as_mut_ptr();
             unsafe {
-                zkm2_lib::syscall_u256x2048_mul(
+                zkm_lib::syscall_u256x2048_mul(
                     cast_ref(&a.to_words()),
                     cast_ref(&b_array.to_words()),
                     result_ptr as *mut [u32; 64],
